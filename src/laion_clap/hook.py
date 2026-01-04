@@ -76,9 +76,14 @@ class CLAP_Module(torch.nn.Module):
         ----------
         ckpt: str
             Path to the safetensors checkpoint file to load.
+            Checkpoints can be converted from the original .pt format using:
+            `from safetensors.torch import save_file; save_file(torch.load('model.pt'), 'model.safetensors')`
         """
         if ckpt is None:
-            raise ValueError("Checkpoint path must be specified. Auto-download is no longer supported.")
+            raise ValueError(
+                "Checkpoint path must be specified. Auto-download is no longer supported. "
+                "Please provide a path to a local safetensors checkpoint file."
+            )
         state_dict = load_state_dict(ckpt, skip_params=True)
         self.model.load_state_dict(state_dict)
     
@@ -90,7 +95,8 @@ class CLAP_Module(torch.nn.Module):
         x: List[str] (N,): 
             an audio file list to extract features, audio files can have different lengths (as we have the feature fusion machanism)
         use_tensor: boolean:
-            if True, it will return the torch tensor, preserving the gradient (default: False).
+            if True, returns a tensor attached to the computation graph (default: False).
+            If False, returns a detached tensor on CPU.
         Returns
         ----------
         audio_embed : torch.Tensor (N,D):
@@ -171,7 +177,8 @@ class CLAP_Module(torch.nn.Module):
         tokenizer: func:
             the tokenizer function, if not provided (None), will use the default Roberta tokenizer.
         use_tensor: boolean:
-            if True, the output will be the tensor, preserving the gradient (default: False).      
+            if True, returns a tensor attached to the computation graph (default: False).
+            If False, returns a detached tensor on CPU.
         Returns
         ----------
         text_embed : torch.Tensor (N,D):

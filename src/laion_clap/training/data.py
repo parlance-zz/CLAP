@@ -88,11 +88,12 @@ def get_audio_features(sample, audio_data, max_len, data_truncating, data_fillin
                     # Split range [0, total_frames - chunk_frames] into 3 parts using torch
                     range_len = total_frames - chunk_frames + 1
                     ranges = torch.tensor_split(torch.arange(range_len), 3)
+                    # Ensure each range has at least one element for torch.randint
+                    if len(ranges[0]) == 0:
+                        ranges = (torch.tensor([0]), ranges[1], ranges[2])
                     if len(ranges[1]) == 0:
-                        # if the audio is too short, we just use the first chunk
                         ranges = (ranges[0], torch.tensor([0]), ranges[2])
                     if len(ranges[2]) == 0:
-                        # if the audio is too short, we just use the first chunk
                         ranges = (ranges[0], ranges[1], torch.tensor([0]))
                     # randomly choose index for each part
                     idx_front = ranges[0][torch.randint(len(ranges[0]), (1,))].item()
