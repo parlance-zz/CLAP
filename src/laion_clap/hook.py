@@ -140,8 +140,9 @@ class CLAP_Module(torch.nn.Module):
         x: torch.Tensor (N,T): 
             audio data, must be mono audio tracks.
         use_tensor: boolean:
-            if True, x should be the tensor input and the output will be the tensor, preserving the gradient (default: False).      
-            Note that if 'use tensor' is set to True, it will not do the quantize of the audio waveform (otherwise the gradient will not be preserved).
+            if True, returns a tensor attached to the computation graph (default: False).
+            If False, returns a detached tensor on CPU.
+            Note that if 'use_tensor' is set to True, it will not do the quantize of the audio waveform (otherwise the gradient will not be preserved).
         Returns
         ----------
         audio embed: torch.Tensor (N,D):
