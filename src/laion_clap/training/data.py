@@ -430,21 +430,19 @@ def get_audio_features(sample, audio_data, max_len, data_truncating, data_fillin
                     sample["mel_fusion"] = mel_fusion
                     longer = torch.tensor([False])
                 else:
-                    ranges = np.array_split(list(range(0, total_frames - chunk_frames + 1)), 3)
-                    # print('total_frames-chunk_frames:', total_frames-chunk_frames,
-                    #       'len(audio_data):', len(audio_data),
-                    #       'chunk_frames:', chunk_frames,
-                    #       'total_frames:', total_frames)
+                    # Split range [0, total_frames - chunk_frames] into 3 parts using torch
+                    range_len = total_frames - chunk_frames + 1
+                    ranges = torch.tensor_split(torch.arange(range_len), 3)
                     if len(ranges[1]) == 0:
                         # if the audio is too short, we just use the first chunk
-                        ranges[1] = [0]
+                        ranges = (ranges[0], torch.tensor([0]), ranges[2])
                     if len(ranges[2]) == 0:
                         # if the audio is too short, we just use the first chunk
-                        ranges[2] = [0]
+                        ranges = (ranges[0], ranges[1], torch.tensor([0]))
                     # randomly choose index for each part
-                    idx_front = np.random.choice(ranges[0])
-                    idx_middle = np.random.choice(ranges[1])
-                    idx_back = np.random.choice(ranges[2])
+                    idx_front = ranges[0][torch.randint(len(ranges[0]), (1,))].item()
+                    idx_middle = ranges[1][torch.randint(len(ranges[1]), (1,))].item()
+                    idx_back = ranges[2][torch.randint(len(ranges[2]), (1,))].item()
                     # select mel
                     mel_chunk_front = mel[idx_front:idx_front + chunk_frames, :]
                     mel_chunk_middle = mel[idx_middle:idx_middle + chunk_frames, :]
@@ -464,7 +462,7 @@ def get_audio_features(sample, audio_data, max_len, data_truncating, data_fillin
                 )
             # random crop to max_len (for compatibility)
             overflow = len(audio_data) - max_len
-            idx = np.random.integers(0, overflow + 1)
+            idx = torch.randint(0, overflow + 1, (1,)).item()
             audio_data = audio_data[idx: idx + max_len]
 
         else:  # padding if too short

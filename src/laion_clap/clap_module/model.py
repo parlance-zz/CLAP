@@ -6,10 +6,9 @@ Adapted to the Audio Task.
 
 from collections import OrderedDict
 from dataclasses import dataclass
-from email.mime import audio
+import math
 from typing import Tuple, Union, Callable, Optional
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -542,8 +541,8 @@ class CLAP(nn.Module):
                 nn.Linear(self.joint_embed_shape, self.joint_embed_shape)
             )
 
-        self.logit_scale_a = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
-        self.logit_scale_t = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
+        self.logit_scale_a = nn.Parameter(torch.ones([]) * math.log(1 / 0.07))
+        self.logit_scale_t = nn.Parameter(torch.ones([]) * math.log(1 / 0.07))
         self.register_buffer("attn_mask", self.build_attention_mask(), persistent=False)
 
         self.init_text_branch_parameters()
@@ -568,8 +567,8 @@ class CLAP(nn.Module):
             width = self.text_branch.shared.weight.shape[-1]
         else:
             width = self.text_branch.width
-        nn.init.constant_(self.logit_scale_a, np.log(1 / 0.07))
-        nn.init.constant_(self.logit_scale_t, np.log(1 / 0.07))
+        nn.init.constant_(self.logit_scale_a, math.log(1 / 0.07))
+        nn.init.constant_(self.logit_scale_t, math.log(1 / 0.07))
 
         # deprecated
         # if hasattr(self.visual, 'init_parameters'):
